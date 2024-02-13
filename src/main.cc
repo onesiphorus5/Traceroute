@@ -42,9 +42,12 @@ int main( int argc, const char* argv[] ) {
    struct in_addr _in_addr = {.s_addr = resolved_ip };
    std::string _in_addr_str = std::string( inet_ntoa( _in_addr ) );
 
-   std::string first_line = "traceroute to ";
-   first_line += std::string( argv[1] );
-   first_line += " (" + _in_addr_str + "), 64 hops max";
+   std::string udp_message = std::string( "trace route for " ) + _in_addr_str;
+
+   std::string first_line = "traceroute to " + std::string( argv[1] );
+   first_line += " (" + _in_addr_str + "), ";
+   first_line += std::to_string( MAX_HOP_COUNT) + " hops max, ";
+   first_line += std::to_string( udp_message.size() ) + " byte packets";
    std::cout << first_line << std::endl;
 
    // Create a UDP socket
@@ -54,6 +57,7 @@ int main( int argc, const char* argv[] ) {
       exit( EXIT_FAILURE );
    }
    // Bind the UDP socket to a port
+   // We will use this port to know the 
    uint16_t local_port = ( getpid() & 0xFFFF ) | 0x8000;
    struct sockaddr_in local_addr;
    local_addr.sin_family = AF_INET;
@@ -95,16 +99,12 @@ int main( int argc, const char* argv[] ) {
          perror( "gettimeofday()" );
          exit( EXIT_FAILURE );
       }
-      std::string udp_message = std::string( "trace route for " ) + _in_addr_str;
       if ( sendto( udp_socket, udp_message.c_str(), udp_message.size(), 0,  
                    (const struct sockaddr*) &host_addr, addrlen ) == -1  ) {
          perror( "sendto()" );
          exit( EXIT_FAILURE );
       }
 
-      // Start the alarm
-
-   
       // Receive ICMP packets
       int icmp_socket = socket( AF_INET, SOCK_RAW, IPPROTO_ICMP );
       if ( icmp_socket == -1 ) {

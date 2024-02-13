@@ -19,7 +19,8 @@ public:
       size_t headers_size = 0;
       headers_size += sizeof( struct iphdr );
       headers_size += sizeof( struct icmphdr );
-      headers_size += sizeof( struct iphdr ); // TODO: add why
+      // The original package headers (IP and UDP) are included 
+      headers_size += sizeof( struct iphdr );
       headers_size += sizeof( struct udphdr );
 
       if ( size < headers_size ) {
